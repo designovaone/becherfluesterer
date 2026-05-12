@@ -94,7 +94,7 @@ export default async function Page() {
           {/* CTAs */}
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Link href="/anmelden" className="btn-amber">
-              Mit Passphrase eintreten →
+              Mitspieler →
             </Link>
             <Link href="/admin/anmelden" className="btn-secondary">
               Admin-Bereich
