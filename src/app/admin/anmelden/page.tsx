@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { isAdmin } from "@/lib/auth";
-import { adminLoginAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +30,7 @@ export default async function AdminAnmeldenPage({
             </div>
           )}
 
-          <form action={adminLoginAction} className="grid gap-4">
+          <form action="/admin/anmelden/login" method="POST" className="grid gap-4">
             <div>
               <label className="label" htmlFor="pw">Passwort</label>
               <input

@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getViewerSession } from "@/lib/auth";
-import { anmeldenAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -32,7 +31,7 @@ export default async function AnmeldenPage({
             </div>
           )}
 
-          <form action={anmeldenAction} className="grid gap-4">
+          <form action="/anmelden/login" method="POST" className="grid gap-4">
             <div>
               <label className="label" htmlFor="passphrase">Passphrase</label>
               <input
