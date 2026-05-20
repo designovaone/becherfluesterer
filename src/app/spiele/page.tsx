@@ -10,12 +10,16 @@ import {
   isLocked,
 } from "@/lib/format";
 import { STAKE_EUR, payoutPerWinner, winnersOfMatch } from "@/lib/scoring";
-import { placeBet } from "./actions";
 
 export const dynamic = "force-dynamic";
 
-export default async function SpielePage() {
+export default async function SpielePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ fehler?: string }>;
+}) {
   const session = await requireViewer();
+  const { fehler } = await searchParams;
 
   // Load all matches with their bets and bettor names
   const allMatches = await db
@@ -53,6 +57,12 @@ export default async function SpielePage() {
             </p>
           </div>
         </div>
+
+        {fehler && (
+          <div className="mb-4 rounded-lg border border-wine/30 bg-wine/10 px-4 py-2.5 text-sm text-wine">
+            {fehler}
+          </div>
+        )}
 
         {/* Reminder banner */}
         <div className="mb-6 rounded-lg border border-amber_-500/30 bg-amber_-500/10 px-4 py-3 text-sm text-amber_-700 flex items-start gap-3">
@@ -163,7 +173,8 @@ export default async function SpielePage() {
                   )}
                   {bettingOpen && !locked && (
                     <form
-                      action={placeBet}
+                      action="/spiele/tipp"
+                      method="POST"
                       className="flex items-center justify-center gap-3 flex-wrap p-4 rounded-lg bg-parchment-100 border border-forest-800/10"
                     >
                       <input type="hidden" name="matchId" value={m.id} />
