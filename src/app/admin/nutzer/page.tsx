@@ -1,15 +1,19 @@
-import { asc, count, eq } from "drizzle-orm";
+import { asc, count } from "drizzle-orm";
 import { db, users, bets } from "@/db";
 import { requireAdmin } from "@/lib/auth";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
-import { deleteUser } from "./actions";
 import { formatDateTime } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminNutzerPage() {
+export default async function AdminNutzerPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ fehler?: string }>;
+}) {
   await requireAdmin();
+  const { fehler } = await searchParams;
 
   const list = await db
     .select({
@@ -37,6 +41,12 @@ export default async function AdminNutzerPage() {
         <p className="text-sm text-forest-800/70 mb-6">
           Konten werden bei der ersten Anmeldung automatisch erstellt.
         </p>
+
+        {fehler && (
+          <div className="mb-4 rounded-lg border border-wine/30 bg-wine/10 px-4 py-2.5 text-sm text-wine">
+            {fehler}
+          </div>
+        )}
 
         <div className="card overflow-hidden">
           <table className="w-full text-sm">
@@ -66,7 +76,8 @@ export default async function AdminNutzerPage() {
                     {countByUser.get(u.id) ?? 0}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <form action={deleteUser}>
+                    <form action="/admin/nutzer/do" method="POST">
+                      <input type="hidden" name="op" value="delete" />
                       <input type="hidden" name="id" value={u.id} />
                       <button
                         type="submit"

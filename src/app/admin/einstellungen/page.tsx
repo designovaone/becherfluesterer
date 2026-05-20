@@ -1,7 +1,6 @@
 import { requireAdmin } from "@/lib/auth";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
-import { updateViewerPassphrase, updateAdminPassword } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -38,7 +37,8 @@ export default async function AdminSettingsPage({
           <p className="text-sm text-forest-800/70 mb-4">
             Wird von allen Mitgliedern beim Eintreten verwendet.
           </p>
-          <form action={updateViewerPassphrase} className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
+          <form action="/admin/einstellungen/do" method="POST" className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
+            <input type="hidden" name="op" value="passphrase" />
             <div>
               <label className="label" htmlFor="newViewer">Neue Passphrase</label>
               <input id="newViewer" name="newViewer" type="text" className="input" required minLength={6} />
@@ -49,7 +49,8 @@ export default async function AdminSettingsPage({
 
         <section className="card p-6">
           <h2 className="font-display text-2xl mb-3">Admin-Passwort</h2>
-          <form action={updateAdminPassword} className="grid gap-3">
+          <form action="/admin/einstellungen/do" method="POST" className="grid gap-3">
+            <input type="hidden" name="op" value="admin" />
             <div>
               <label className="label" htmlFor="currentAdmin">Aktuelles Passwort</label>
               <input id="currentAdmin" name="currentAdmin" type="password" className="input" required />

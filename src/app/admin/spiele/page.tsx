@@ -5,14 +5,6 @@ import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { formatDateTime } from "@/lib/format";
 import { winnersOfMatch } from "@/lib/scoring";
-import {
-  createMatch,
-  deleteMatch,
-  setResult,
-  toggleBettingOpen,
-  updateMatch,
-} from "./actions";
-
 export const dynamic = "force-dynamic";
 
 const STAGES = [
@@ -39,8 +31,13 @@ function toLocalInput(d: Date) {
   return parts;
 }
 
-export default async function AdminSpielePage() {
+export default async function AdminSpielePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ fehler?: string }>;
+}) {
   await requireAdmin();
+  const { fehler } = await searchParams;
 
   const list = await db.select().from(matches).orderBy(asc(matches.kickoffAt));
 
@@ -71,13 +68,21 @@ export default async function AdminSpielePage() {
           Neue Spiele anlegen, Ergebnisse eintragen, jederzeit korrigieren.
         </p>
 
+        {fehler && (
+          <div className="mb-4 rounded-lg border border-wine/30 bg-wine/10 px-4 py-2.5 text-sm text-wine">
+            {fehler}
+          </div>
+        )}
+
         {/* CREATE */}
         <section className="card p-5 mb-8">
           <h2 className="font-display text-2xl mb-4">Neues Spiel</h2>
           <form
-            action={createMatch}
+            action="/admin/spiele/do"
+            method="POST"
             className="grid grid-cols-1 md:grid-cols-[1fr_1fr_1fr_1fr_auto] gap-3 items-end"
           >
+            <input type="hidden" name="op" value="create" />
             <div>
               <label className="label" htmlFor="stage">Phase</label>
               <select id="stage" name="stage" className="input" defaultValue="Gruppenphase">
@@ -154,7 +159,8 @@ export default async function AdminSpielePage() {
                   </span>
                 </div>
                 <div className="flex items-center gap-3 flex-wrap">
-                  <form action={toggleBettingOpen}>
+                  <form action="/admin/spiele/do" method="POST">
+                    <input type="hidden" name="op" value="toggle" />
                     <input type="hidden" name="id" value={m.id} />
                     <button
                       type="submit"
@@ -168,7 +174,8 @@ export default async function AdminSpielePage() {
                       {m.bettingOpen ? "✓ Wetten offen" : "Wetten geschlossen"}
                     </button>
                   </form>
-                  <form action={deleteMatch}>
+                  <form action="/admin/spiele/do" method="POST">
+                    <input type="hidden" name="op" value="delete" />
                     <input type="hidden" name="id" value={m.id} />
                     <button
                       type="submit"
@@ -182,9 +189,11 @@ export default async function AdminSpielePage() {
 
               {/* Edit basics */}
               <form
-                action={updateMatch}
+                action="/admin/spiele/do"
+                method="POST"
                 className="grid grid-cols-1 md:grid-cols-[1fr_1fr_1fr_1fr_auto] gap-3 items-end"
               >
+                <input type="hidden" name="op" value="update" />
                 <input type="hidden" name="id" value={m.id} />
                 <div>
                   <label className="label">Phase</label>
@@ -217,9 +226,11 @@ export default async function AdminSpielePage() {
 
               {/* Result */}
               <form
-                action={setResult}
+                action="/admin/spiele/do"
+                method="POST"
                 className="mt-4 pt-4 border-t border-forest-800/10"
               >
+                <input type="hidden" name="op" value="result" />
                 <input type="hidden" name="id" value={m.id} />
                 {m.stage !== "Gruppenphase" && (
                   <p className="mb-3 text-xs text-amber_-700">
