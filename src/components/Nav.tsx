@@ -35,12 +35,14 @@ export function Nav({
             </span>
           )}
           {(name || admin) && (
-            <Link
-              href="/abmelden"
-              className="ml-1 px-3 py-1.5 rounded hover:bg-parchment-200 text-forest-800/70"
-            >
-              Abmelden
-            </Link>
+            <form action="/abmelden" method="POST" className="ml-1">
+              <button
+                type="submit"
+                className="px-3 py-1.5 rounded hover:bg-parchment-200 text-forest-800/70"
+              >
+                Abmelden
+              </button>
+            </form>
           )}
         </nav>
       </div>
