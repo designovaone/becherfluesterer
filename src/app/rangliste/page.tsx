@@ -116,21 +116,24 @@ export default async function RanglistePage() {
           {formatEuro(adminCut)}
         </p>
 
-        <div className="card overflow-hidden">
+        <div className="card overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-parchment-200/70">
               <tr className="text-left">
-                <th className="px-4 py-3 w-12">#</th>
-                <th className="px-4 py-3">Name</th>
-                <th className="px-4 py-3 text-right">Tipps</th>
-                <th className="px-4 py-3 text-right">Gewonnen</th>
-                <th className="px-4 py-3 text-right">Gewinn</th>
+                <th className="px-3 sm:px-4 py-3 w-10 sm:w-12">#</th>
+                <th className="px-3 sm:px-4 py-3">Name</th>
+                <th className="hidden sm:table-cell px-2 sm:px-4 py-3 text-right">Tipps</th>
+                <th className="px-2 sm:px-4 py-3 text-right">
+                  <span className="sm:hidden">Gew.</span>
+                  <span className="hidden sm:inline">Gewonnen</span>
+                </th>
+                <th className="px-3 sm:px-4 py-3 text-right">Gewinn</th>
               </tr>
             </thead>
             <tbody>
               {rows.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-forest-800/60">
+                  <td colSpan={5} className="px-3 sm:px-4 py-8 text-center text-forest-800/60">
                     Noch keine Mitglieder.
                   </td>
                 </tr>
@@ -146,18 +149,18 @@ export default async function RanglistePage() {
                       (me ? "bg-amber_-500/10" : "")
                     }
                   >
-                    <td className="px-4 py-3 tabular-nums">
+                    <td className="px-3 sm:px-4 py-3 tabular-nums">
                       {medal ?? i + 1}
                     </td>
-                    <td className="px-4 py-3 font-medium">
+                    <td className="px-3 sm:px-4 py-3 font-medium">
                       {r.name}
                       {me && (
                         <span className="text-forest-800/50"> (du)</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-right tabular-nums">{r.bets}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">{r.wins}</td>
-                    <td className="px-4 py-3 text-right tabular-nums font-semibold">
+                    <td className="hidden sm:table-cell px-2 sm:px-4 py-3 text-right tabular-nums">{r.bets}</td>
+                    <td className="px-2 sm:px-4 py-3 text-right tabular-nums">{r.wins}</td>
+                    <td className="px-3 sm:px-4 py-3 text-right tabular-nums font-semibold whitespace-nowrap">
                       {formatEuro(r.winnings)}
                     </td>
                   </tr>
