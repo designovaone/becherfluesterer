@@ -16,6 +16,12 @@ export async function POST(req: NextRequest) {
       303,
     );
   }
+  if (name.length > 40) {
+    return NextResponse.redirect(
+      `${origin}/anmelden?fehler=${encodeURIComponent("Name zu lang (max. 40 Zeichen).")}`,
+      303,
+    );
+  }
 
   const [cfg] = await db.select().from(settings).limit(1);
   if (!cfg) {
