@@ -121,10 +121,10 @@ export default async function SpielePage({
                 }
               >
                 {/* HEAD */}
-                <div className="px-5 py-4 flex items-center justify-between gap-3 border-b border-forest-800/10">
-                  <div className="flex items-center gap-3 min-w-0">
+                <div className="px-4 sm:px-5 py-3 sm:py-4 flex items-center justify-between gap-x-3 gap-y-1.5 flex-wrap border-b border-forest-800/10">
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-wrap">
                     <span className="chip">{m.stage}</span>
-                    <span className="text-sm text-forest-800/70 tabular-nums">
+                    <span className="text-xs sm:text-sm text-forest-800/70 tabular-nums">
                       {formatDateTime(m.kickoffAt)}
                     </span>
                   </div>
