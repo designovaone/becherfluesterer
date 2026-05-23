@@ -9,11 +9,22 @@ import {
   index,
 } from "drizzle-orm/pg-core";
 
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull().unique(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+export const users = pgTable(
+  "users",
+  {
+    id: serial("id").primaryKey(),
+    firstName: text("first_name").notNull(),
+    lastName: text("last_name").notNull(),
+    firstNameKey: text("first_name_key").notNull(),
+    lastNameKey: text("last_name_key").notNull(),
+    passwordHash: text("password_hash").notNull(),
+    sessionEpoch: integer("session_epoch").notNull().default(1),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    nameKeyUnq: uniqueIndex("users_name_key_unq").on(t.firstNameKey, t.lastNameKey),
+  }),
+);
 
 export const matches = pgTable(
   "matches",
