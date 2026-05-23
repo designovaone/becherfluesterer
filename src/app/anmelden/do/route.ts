@@ -11,6 +11,14 @@ import {
   verifyPassword,
 } from "@/lib/auth";
 
+function isObj(v: unknown): v is Record<string, unknown> {
+  return v !== null && typeof v === "object";
+}
+function getStr(o: Record<string, unknown>, k: string): string | undefined {
+  const v = o[k];
+  return typeof v === "string" ? v : undefined;
+}
+
 export async function POST(req: NextRequest) {
   const origin = new URL(req.url).origin;
 
@@ -78,15 +86,13 @@ export async function POST(req: NextRequest) {
       await setViewerSession(row);
       return NextResponse.redirect(`${origin}/spiele`, 303);
     } catch (e) {
-      // Postgres unique-violation code on (first_name_key, last_name_key).
-      // Confirm on first deliberate duplicate test that this field exists on
-      // @neondatabase/serverless errors — if not, fall back to message match.
-      if (
-        e &&
-        typeof e === "object" &&
-        "code" in e &&
-        (e as { code: string }).code === "23505"
-      ) {
+      // Postgres unique-violation on (first_name_key, last_name_key).
+      // Drizzle wraps the underlying NeonDbError, so the SQLSTATE '23505'
+      // lives on e.cause.code, not on e.code. Check both to be safe.
+      const code =
+        (isObj(e) && getStr(e, "code")) ||
+        (isObj(e) && isObj(e.cause) && getStr(e.cause, "code"));
+      if (code === "23505") {
         return back("fehler=duplicate");
       }
       throw e;
