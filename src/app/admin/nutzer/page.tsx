@@ -1,19 +1,22 @@
 import { asc, count } from "drizzle-orm";
+import { cookies } from "next/headers";
 import { db, users, bets } from "@/db";
 import { requireAdmin } from "@/lib/auth";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { formatDateTime } from "@/lib/format";
+import { ConfirmButton } from "./ConfirmButton";
+import { TempBanner } from "./TempBanner";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminNutzerPage({
   searchParams,
 }: {
-  searchParams: Promise<{ fehler?: string }>;
+  searchParams: Promise<{ fehler?: string; show?: string }>;
 }) {
   await requireAdmin();
-  const { fehler } = await searchParams;
+  const { fehler, show } = await searchParams;
 
   const list = await db
     .select({
@@ -34,19 +37,47 @@ export default async function AdminNutzerPage({
     betCounts.map((r) => [r.userId, Number(r.c)]),
   );
 
+  // Read the one-shot temp-password cookie if the URL says to show it. We do
+  // NOT call cookies().delete() here — Server Components in Next 15 can read
+  // cookies but cannot modify them during render. The cookie's Max-Age=60s
+  // handles cleanup naturally; if the admin reloads ?show=<id> within 60s,
+  // the banner re-appears, which is acceptable because (a) it's HttpOnly so
+  // no script can read it, and (b) the only "leak" is the admin re-seeing
+  // their own freshly-generated value on their own browser.
+  const showId = show ? Number(show) : null;
+  let tempBannerName: string | null = null;
+  let tempBannerValue: string | null = null;
+  if (showId && Number.isInteger(showId) && showId > 0) {
+    const c = await cookies();
+    const tempCookie = c.get(`bf_temp_pw_${showId}`)?.value;
+    if (tempCookie) {
+      // If the user was deleted between reset and view, name is empty and the
+      // banner falls back to "Mitglied". Documented trade-off; harmless.
+      const u = list.find((row) => row.id === showId);
+      tempBannerName = u ? `${u.firstName} ${u.lastName}` : "";
+      tempBannerValue = tempCookie;
+    }
+  }
+
   return (
     <>
       <Nav admin />
       <main className="max-w-5xl mx-auto px-5 py-10">
         <h1 className="h-display text-4xl mb-1">Mitglieder</h1>
         <p className="text-sm text-forest-800/70 mb-6">
-          Konten werden bei der ersten Anmeldung automatisch erstellt.
+          Mitglieder registrieren sich selbst über{" "}
+          <code className="px-1 rounded bg-parchment-200/70">/anmelden</code>.
+          Hier kannst du Passwörter zurücksetzen oder Mitglieder löschen.
         </p>
 
         {fehler && (
           <div className="mb-4 rounded-lg border border-wine/30 bg-wine/10 px-4 py-2.5 text-sm text-wine">
             {fehler}
           </div>
+        )}
+
+        {tempBannerValue !== null && (
+          <TempBanner name={tempBannerName ?? ""} temp={tempBannerValue} />
         )}
 
         <div className="card overflow-x-auto">
@@ -77,16 +108,30 @@ export default async function AdminNutzerPage({
                     {countByUser.get(u.id) ?? 0}
                   </td>
                   <td className="px-3 sm:px-4 py-3 text-right">
-                    <form action="/admin/nutzer/do" method="POST">
-                      <input type="hidden" name="op" value="delete" />
-                      <input type="hidden" name="id" value={u.id} />
-                      <button
-                        type="submit"
-                        className="text-xs text-wine hover:underline"
-                      >
-                        Löschen
-                      </button>
-                    </form>
+                    <div className="flex items-center justify-end gap-3 flex-wrap">
+                      <form action="/admin/nutzer/do" method="POST">
+                        <input type="hidden" name="op" value="reset" />
+                        <input type="hidden" name="id" value={u.id} />
+                        <ConfirmButton
+                          type="submit"
+                          message={`Passwort für ${u.firstName} ${u.lastName} zurücksetzen? Alle bestehenden Sitzungen werden sofort ungültig.`}
+                          className="text-xs text-forest-800/80 hover:underline"
+                        >
+                          Passwort zurücksetzen
+                        </ConfirmButton>
+                      </form>
+                      <form action="/admin/nutzer/do" method="POST">
+                        <input type="hidden" name="op" value="delete" />
+                        <input type="hidden" name="id" value={u.id} />
+                        <ConfirmButton
+                          type="submit"
+                          message={`Mitglied ${u.firstName} ${u.lastName} löschen? Alle Tipps dieses Mitglieds werden mit entfernt.`}
+                          className="text-xs text-wine hover:underline"
+                        >
+                          Löschen
+                        </ConfirmButton>
+                      </form>
+                    </div>
                   </td>
                 </tr>
               ))}
