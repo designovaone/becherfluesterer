@@ -37,7 +37,22 @@ if (!process.env.DATABASE_URL) {
 }
 const sql = neon(process.env.DATABASE_URL);
 
+// scrypt hash of "test" — for QA fixtures only. Inlined as a literal because
+// src/lib/auth.ts starts with `import "server-only"` and would throw if we
+// tried to import its hashPassword from this plain Node script.
+const TEST_PASSWORD_HASH =
+  "scrypt$PxZaBDJ-AYaFYaaCMLFOGw$2TMKlxKhV42XlRfgHIFLy2wNKBXiTItcdhk3L7uKUenfy6Erac0MH3ctaxqQz1Xt9L_EAoBEAzYKwq8d5RJ5Yw";
+
+// Mirror of normalizeName() in src/lib/auth.ts. Inlined for the same reason.
+function normalizeName(s) {
+  return s.normalize("NFKC").trim().replace(/\s+/g, " ").toLowerCase();
+}
+
 const STAKE_EUR = 2;
+
+// All fixtures share last_name = "Test"; the unique index spans
+// (first_name_key, last_name_key) so distinct first names keep them unique.
+const FIXTURE_LAST_NAME = "Test";
 
 const userNames = [
   "Andreas", "Brigitte", "Christian", "Doris", "Emma",
@@ -67,23 +82,24 @@ const bets = {
   G6: { Andreas:[0,0], Brigitte:[2,2], Christian:[3,0], Doris:[0,2], Emma:[3,1], Friedrich:[0,3], Gerda:[2,1], Hans:[4,4], Ines:[3,3], Jürgen:[5,0], Klara:[0,5], Lukas:[4,0], Maria:[2,3], Norbert:[3,2], Oskar:[0,4] },
 };
 
-// Hand-computed expected ranking (one row per user).
+// Hand-computed expected ranking (one row per user). Names are the full
+// display name "{first} Test" because the page renders first + last.
 const expected = [
-  { name: "Andreas",   bets: 5, wins: 1, winnings: 15.00 }, // G1 exact solo
-  { name: "Emma",      bets: 5, wins: 1, winnings: 15.00 }, // G3 L1=1 solo
-  { name: "Gerda",     bets: 5, wins: 1, winnings: 15.00 }, // G6 L1=1 solo
-  { name: "Brigitte",  bets: 5, wins: 1, winnings:  7.50 }, // G2 exact tie (1/2)
-  { name: "Christian", bets: 5, wins: 1, winnings:  7.50 }, // G2 exact tie (1/2)
-  { name: "Doris",     bets: 5, wins: 0, winnings:  0.00 },
-  { name: "Friedrich", bets: 5, wins: 0, winnings:  0.00 },
-  { name: "Hans",      bets: 5, wins: 0, winnings:  0.00 },
-  { name: "Ines",      bets: 5, wins: 0, winnings:  0.00 },
-  { name: "Jürgen",    bets: 5, wins: 0, winnings:  0.00 },
-  { name: "Klara",     bets: 5, wins: 0, winnings:  0.00 },
-  { name: "Lukas",     bets: 5, wins: 0, winnings:  0.00 },
-  { name: "Maria",     bets: 5, wins: 0, winnings:  0.00 },
-  { name: "Norbert",   bets: 5, wins: 0, winnings:  0.00 },
-  { name: "Oskar",     bets: 5, wins: 0, winnings:  0.00 },
+  { name: "Andreas Test",   bets: 5, wins: 1, winnings: 15.00 }, // G1 exact solo
+  { name: "Emma Test",      bets: 5, wins: 1, winnings: 15.00 }, // G3 L1=1 solo
+  { name: "Gerda Test",     bets: 5, wins: 1, winnings: 15.00 }, // G6 L1=1 solo
+  { name: "Brigitte Test",  bets: 5, wins: 1, winnings:  7.50 }, // G2 exact tie (1/2)
+  { name: "Christian Test", bets: 5, wins: 1, winnings:  7.50 }, // G2 exact tie (1/2)
+  { name: "Doris Test",     bets: 5, wins: 0, winnings:  0.00 },
+  { name: "Friedrich Test", bets: 5, wins: 0, winnings:  0.00 },
+  { name: "Hans Test",      bets: 5, wins: 0, winnings:  0.00 },
+  { name: "Ines Test",      bets: 5, wins: 0, winnings:  0.00 },
+  { name: "Jürgen Test",    bets: 5, wins: 0, winnings:  0.00 },
+  { name: "Klara Test",     bets: 5, wins: 0, winnings:  0.00 },
+  { name: "Lukas Test",     bets: 5, wins: 0, winnings:  0.00 },
+  { name: "Maria Test",     bets: 5, wins: 0, winnings:  0.00 },
+  { name: "Norbert Test",   bets: 5, wins: 0, winnings:  0.00 },
+  { name: "Oskar Test",     bets: 5, wins: 0, winnings:  0.00 },
 ];
 
 // ---- Mirror of src/lib/scoring.ts ----
@@ -112,9 +128,15 @@ async function seed() {
   await sql`DELETE FROM matches`;
 
   const userByName = new Map();
-  for (const name of userNames) {
-    const [u] = await sql`INSERT INTO users (name) VALUES (${name}) RETURNING id, name`;
-    userByName.set(name, u);
+  for (const firstName of userNames) {
+    const fnKey = normalizeName(firstName);
+    const lnKey = normalizeName(FIXTURE_LAST_NAME);
+    const [u] = await sql`
+      INSERT INTO users (first_name, last_name, first_name_key, last_name_key, password_hash)
+      VALUES (${firstName}, ${FIXTURE_LAST_NAME}, ${fnKey}, ${lnKey}, ${TEST_PASSWORD_HASH})
+      RETURNING id, first_name AS "firstName", last_name AS "lastName"
+    `;
+    userByName.set(firstName, u);
   }
   console.log(`Inserted ${userByName.size} users.`);
 
@@ -147,7 +169,7 @@ async function seed() {
 
 // ---- Mirror of /rangliste page logic ----
 async function computeRanglisteFromDb() {
-  const allUsers = await sql`SELECT id, name FROM users`;
+  const allUsers = await sql`SELECT id, first_name AS "firstName", last_name AS "lastName" FROM users`;
   const allMatches = await sql`SELECT * FROM matches ORDER BY id ASC`;
   const rawBets = await sql`SELECT * FROM bets`;
 
@@ -168,7 +190,13 @@ async function computeRanglisteFromDb() {
 
   const stats = new Map();
   for (const u of allUsers) {
-    stats.set(u.id, { userId: u.id, name: u.name, bets: 0, wins: 0, winnings: 0 });
+    stats.set(u.id, {
+      userId: u.id,
+      name: `${u.firstName} ${u.lastName}`,
+      bets: 0,
+      wins: 0,
+      winnings: 0,
+    });
   }
   for (const b of allBets) {
     const row = stats.get(b.user_id);
@@ -212,9 +240,9 @@ async function main() {
 
   console.log("\n=== Rangliste (computed from DB with the page's algorithm) ===");
   console.log(`Total Pot: ${fmtEUR(totalPot)} · Party-Kasse (50%): ${fmtEUR(totalPot/2)}`);
-  console.log(`# | ${pad("Name",12)} | Tipps | Gewonnen | Gewinn`);
+  console.log(`# | ${pad("Name",18)} | Tipps | Gewonnen | Gewinn`);
   rows.forEach((r, i) => {
-    console.log(`${rpad(i+1,2)}| ${pad(r.name,12)} | ${rpad(r.bets,5)} | ${rpad(r.wins,8)} | ${fmtEUR(r.winnings)}`);
+    console.log(`${rpad(i+1,2)}| ${pad(r.name,18)} | ${rpad(r.bets,5)} | ${rpad(r.wins,8)} | ${fmtEUR(r.winnings)}`);
   });
 
   console.log("\n=== Row-by-row comparison vs hand-computed expected ===");

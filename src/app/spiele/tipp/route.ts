@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { and, eq } from "drizzle-orm";
 import { db, bets, matches } from "@/db";
-import { getViewerSession } from "@/lib/auth";
+import { getViewerUser } from "@/lib/auth";
 import { BET_LOCK_MINUTES_BEFORE_KICKOFF, isLocked } from "@/lib/format";
 
 function fail(origin: string, msg: string) {
@@ -14,8 +14,8 @@ function fail(origin: string, msg: string) {
 export async function POST(req: NextRequest) {
   const origin = new URL(req.url).origin;
 
-  const session = await getViewerSession();
-  if (!session) {
+  const user = await getViewerUser();
+  if (!user) {
     return NextResponse.redirect(`${origin}/anmelden`, 303);
   }
 
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
     await db
       .select()
       .from(bets)
-      .where(and(eq(bets.userId, session.userId), eq(bets.matchId, matchId)))
+      .where(and(eq(bets.userId, user.id), eq(bets.matchId, matchId)))
       .limit(1)
   )[0];
 
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
       .where(eq(bets.id, existing.id));
   } else {
     await db.insert(bets).values({
-      userId: session.userId,
+      userId: user.id,
       matchId,
       predHome,
       predAway,

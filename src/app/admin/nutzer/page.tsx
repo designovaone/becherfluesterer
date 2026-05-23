@@ -18,11 +18,12 @@ export default async function AdminNutzerPage({
   const list = await db
     .select({
       id: users.id,
-      name: users.name,
+      firstName: users.firstName,
+      lastName: users.lastName,
       createdAt: users.createdAt,
     })
     .from(users)
-    .orderBy(asc(users.name));
+    .orderBy(asc(users.lastName), asc(users.firstName));
 
   // Count bets per user (small table → one query)
   const betCounts = await db
@@ -68,7 +69,7 @@ export default async function AdminNutzerPage({
               )}
               {list.map((u) => (
                 <tr key={u.id} className="border-t border-forest-800/10">
-                  <td className="px-3 sm:px-4 py-3 font-medium">{u.name}</td>
+                  <td className="px-3 sm:px-4 py-3 font-medium">{u.firstName} {u.lastName}</td>
                   <td className="hidden sm:table-cell px-3 sm:px-4 py-3 text-forest-800/70 whitespace-nowrap">
                     {formatDateTime(u.createdAt)}
                   </td>

@@ -36,7 +36,7 @@ export function Nav({
             </>
           )}
           {name && (
-            <span className="hidden sm:inline-flex ml-2 chip" title="Angemeldet als">
+            <span className="inline-flex ml-2 chip max-w-[12rem] truncate" title="Angemeldet als">
               {admin ? "Admin" : name}
             </span>
           )}

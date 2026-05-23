@@ -1,7 +1,7 @@
 import { asc, eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { db, bets, matches, users } from "@/db";
-import { getViewerSession, isAdmin } from "@/lib/auth";
+import { getViewerUser, isAdmin } from "@/lib/auth";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import {
@@ -23,14 +23,20 @@ type Row = {
 
 export default async function RanglistePage() {
   // Viewer ODER Admin darf rein. Kein Highlight für Admin-only.
-  const viewer = await getViewerSession();
+  const viewer = await getViewerUser();
   const admin = await isAdmin();
   if (!viewer && !admin) redirect("/anmelden");
-  const session = viewer ?? { userId: -1, name: "Admin" };
+  // Admin without a viewer cookie gets a placeholder id that no real row will
+  // ever match, so the (du)-highlight check never fires for admin-only.
+  const session = viewer ?? { id: -1 };
   const isAdminOnly = !viewer && admin;
 
   const allUsers = await db
-    .select({ id: users.id, name: users.name })
+    .select({
+      id: users.id,
+      firstName: users.firstName,
+      lastName: users.lastName,
+    })
     .from(users);
   const allMatches = await db.select().from(matches).orderBy(asc(matches.id));
   const rawBets = await db.select().from(bets);
@@ -51,7 +57,7 @@ export default async function RanglistePage() {
   for (const u of allUsers) {
     stats.set(u.id, {
       userId: u.id,
-      name: u.name,
+      name: `${u.firstName} ${u.lastName}`,
       bets: 0,
       wins: 0,
       winnings: 0,
@@ -108,7 +114,10 @@ export default async function RanglistePage() {
 
   return (
     <>
-      <Nav name={viewer?.name} admin={isAdminOnly} />
+      <Nav
+        name={viewer ? `${viewer.firstName} ${viewer.lastName}` : undefined}
+        admin={isAdminOnly}
+      />
       <main className="max-w-5xl mx-auto px-5 py-10">
         <h1 className="h-display text-4xl mb-1">Rangliste</h1>
         <p className="text-sm text-forest-800/70 mb-6">
@@ -139,7 +148,7 @@ export default async function RanglistePage() {
                 </tr>
               )}
               {rows.map((r, i) => {
-                const me = r.userId === session.userId;
+                const me = r.userId === session.id;
                 const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : null;
                 return (
                   <tr

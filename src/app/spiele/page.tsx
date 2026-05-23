@@ -27,17 +27,22 @@ export default async function SpielePage({
     .from(matches)
     .orderBy(asc(matches.kickoffAt));
 
-  const allBets = await db
+  const allBetsRaw = await db
     .select({
       id: bets.id,
       matchId: bets.matchId,
       userId: bets.userId,
       predHome: bets.predHome,
       predAway: bets.predAway,
-      userName: users.name,
+      firstName: users.firstName,
+      lastName: users.lastName,
     })
     .from(bets)
     .innerJoin(users, eq(bets.userId, users.id));
+  const allBets = allBetsRaw.map((b) => ({
+    ...b,
+    userName: `${b.firstName} ${b.lastName}`,
+  }));
 
   const betsByMatch = new Map<number, typeof allBets>();
   for (const b of allBets) {
@@ -47,7 +52,7 @@ export default async function SpielePage({
 
   return (
     <>
-      <Nav name={session.name} />
+      <Nav name={`${session.firstName} ${session.lastName}`} />
       <main className="max-w-5xl mx-auto px-5 py-10">
         <div className="flex items-end justify-between mb-4 flex-wrap gap-3">
           <div>
@@ -93,7 +98,7 @@ export default async function SpielePage({
               m.awayScore !== null;
 
             const matchBets = bettingOpen ? betsByMatch.get(m.id) ?? [] : [];
-            const myBet = matchBets.find((b) => b.userId === session.userId);
+            const myBet = matchBets.find((b) => b.userId === session.id);
 
             // Winners only meaningful if finalized
             const winnerIds = finalized
@@ -251,7 +256,7 @@ export default async function SpielePage({
                                 >
                                   <span className="truncate">
                                     {b.userName}
-                                    {b.userId === session.userId && (
+                                    {b.userId === session.id && (
                                       <span className="text-forest-800/50">
                                         {" "}
                                         (du)

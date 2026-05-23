@@ -41,17 +41,22 @@ export default async function AdminSpielePage({
 
   const list = await db.select().from(matches).orderBy(asc(matches.kickoffAt));
 
-  const allBets = await db
+  const allBetsRaw = await db
     .select({
       id: bets.id,
       matchId: bets.matchId,
       userId: bets.userId,
       predHome: bets.predHome,
       predAway: bets.predAway,
-      userName: users.name,
+      firstName: users.firstName,
+      lastName: users.lastName,
     })
     .from(bets)
     .innerJoin(users, eq(bets.userId, users.id));
+  const allBets = allBetsRaw.map((b) => ({
+    ...b,
+    userName: `${b.firstName} ${b.lastName}`,
+  }));
 
   const betsByMatch = new Map<number, typeof allBets>();
   for (const b of allBets) {
