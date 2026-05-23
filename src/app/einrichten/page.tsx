@@ -29,7 +29,9 @@ export default async function EinrichtenPage() {
             <label className="label" htmlFor="viewer">Geteilte Passphrase</label>
             <input id="viewer" name="viewer" type="text" className="input" required minLength={6} />
             <p className="text-xs text-forest-800/60 mt-1.5">
-              Diese gibst du an die anderen 30 Mitglieder weiter.
+              Diese teilst du einmal mit deinen Mitspielern. Damit können sie
+              sich ein eigenes Konto anlegen; danach brauchen sie die
+              Passphrase nicht mehr.
             </p>
           </div>
           <button type="submit" className="btn-primary mt-2">

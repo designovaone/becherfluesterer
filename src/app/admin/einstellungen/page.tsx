@@ -35,7 +35,8 @@ export default async function AdminSettingsPage({
         <section className="card p-6 mb-6">
           <h2 className="font-display text-2xl mb-3">Geteilte Passphrase</h2>
           <p className="text-sm text-forest-800/70 mb-4">
-            Wird von allen Mitgliedern beim Eintreten verwendet.
+            Wird zum Anlegen neuer Konten benötigt. Bestehende Mitglieder sind
+            nicht betroffen, wenn du sie änderst.
           </p>
           <form action="/admin/einstellungen/do" method="POST" className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
             <input type="hidden" name="op" value="passphrase" />
