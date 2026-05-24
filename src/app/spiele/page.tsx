@@ -140,7 +140,7 @@ export default async function SpielePage({
                       Abgeschlossen · Topf {formatEuro(STAKE_EUR * matchBets.length)}
                     </span>
                   ) : locked ? (
-                    <span className="chip-locked">Läuft / Gesperrt</span>
+                    <span className="chip-locked whitespace-nowrap">Spiel läuft / Wetten gesperrt</span>
                   ) : (
                     <span className="chip">Tipps offen</span>
                   )}
