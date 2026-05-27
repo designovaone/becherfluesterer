@@ -49,6 +49,19 @@ That's it. No notifications, no app to install, no dashboard. Works in any phone
 | **Tip lockout** | 10 minutes before *Anpfiff*. After that, no changes. |
 | **Money handling** | None. Everything settles in person at the closing party. The app just tracks what's owed. |
 
+### Der Weltmeister-Tipp
+
+A second, standalone game on its own page (`/weltmeister`, linked from the nav so members find it). One bet for the whole tournament: **which nation becomes Weltmeister 2026.**
+
+| | |
+|---|---|
+| **Einsatz** | 5 € per person, one pick |
+| **Topf** | 5 € × number of people who picked |
+| **Pot split** | 50 % to the *Abschlussparty*, 50 % split evenly among everyone who picked the actual champion |
+| **Wett-Schluss** | An admin-set cut-off (default 12 June 2026, 04:00 Berlin — ~24 h after the opener), editable under `/admin/weltmeister` |
+| **Visibility** | Before the cut-off each member sees only their own pick. After it, the full table of all picks is visible to everyone, sorted alphabetically by first name. |
+| **Scoring** | Admin enters the actual world champion under `/admin/weltmeister` after the final; everyone who picked that nation wins an equal share. |
+
 ## What is deliberately *not* in scope
 
 These are design choices, not roadmap gaps. Each one is in service of "the admin should not have to think about this app for more than five minutes a day."
@@ -56,7 +69,7 @@ These are design choices, not roadmap gaps. Each one is in service of "the admin
 - **No email, no SMS, no third-party auth.** A shared *gate passphrase* keeps non-members out of the signup flow. After that, each member has their own first name + last name + password. Password resets are admin-initiated (one-shot temp via WhatsApp). No email verification, no password-reset emails, no SSO. The model fits a group of ~30 friends who already know each other. It does not fit a public website.
 - **No real-money handling.** The pot is a number on a page. Pay each other in cash, beer, or whatever your group settles on.
 - **No automated score-fetching.** The admin watches the match (or checks Kicker the next morning) and types in the result. There is no FIFA API integration, no scraper, no AI agent. Deliberate — adds maybe 20 seconds per match, removes an entire dependency category.
-- **No bracket prediction, no "Wer wird Weltmeister", no over/under, no props.** One score tip per match. That's it.
+- **No bracket prediction, no over/under, no props.** One score tip per match — plus the single **Weltmeister-Tipp** (see below). Nothing else.
 - **No mobile app.** Works in mobile browsers, that's enough.
 - **No multi-tournament support.** Each deployment runs one tournament. Starting a new one means wiping the matches and bets and re-seeding.
 
@@ -94,6 +107,7 @@ If you ran an earlier version (the shared-passphrase + first-name-only model), b
 1. **Apply the migration.** Paste `db/migrations/0001_gated_signup.sql` into the Neon SQL Editor (or pipe via `psql`). It wipes the `users` table (cascades to `bets`) and reshapes it for per-user accounts. Old member names are not preserved — testers re-sign up. The `settings` row (admin password + gate passphrase) is untouched.
 2. **Cookie format invalidation.** The viewer session cookie now carries a `v2|` version prefix. Old cookies still in members' browsers fail parsing cleanly and force a fresh `/anmelden` visit. The admin cookie format is unchanged; existing admin sessions survive.
 3. **Members re-onboard once.** Share the gate passphrase (same value as the old viewer passphrase from `settings`) once via WhatsApp. Members visit `/anmelden`, type the passphrase, then sign up with first name + last name + a password they choose. Done.
+4. **For the Weltmeister-Tipp,** apply `db/migrations/0002_weltmeister.sql` in the Neon SQL Editor (adds the `champion_bets` table and two `settings` columns). Run it directly — **not** via `db:push`, which can prompt on the NOT NULL cut-off default. A fresh `db:push` afterward should report no diff.
 
 ## Why "Becherflüsterer"?
 

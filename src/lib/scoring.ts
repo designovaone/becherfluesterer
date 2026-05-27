@@ -9,6 +9,10 @@
  * Topf pro Spiel: 2 € × Anzahl Tippende.
  * Davon behält der Admin die Hälfte, die andere Hälfte wird gleichmäßig
  * unter den Gewinner(n) aufgeteilt.
+ *
+ * Der Einsatz (`stake`) ist parametrisiert: `payoutPerWinner` nutzt
+ * standardmäßig `STAKE_EUR` (2 € pro Spiel), kann aber mit `CHAMPION_STAKE_EUR`
+ * (5 € für den Weltmeister-Tipp) aufgerufen werden.
  */
 
 export type BetLite = {
@@ -40,14 +44,16 @@ export function winnersOfMatch(
 }
 
 export const STAKE_EUR = 2;
+export const CHAMPION_STAKE_EUR = 5;
 
 /** Gewinn pro Person (gewinnender Topf-Anteil). */
 export function payoutPerWinner(
   numBettors: number,
   numWinners: number,
+  stake: number = STAKE_EUR,
 ): number {
   if (numWinners <= 0) return 0;
-  const pot = STAKE_EUR * numBettors;
+  const pot = stake * numBettors;
   const distributable = pot / 2;
   return distributable / numWinners;
 }

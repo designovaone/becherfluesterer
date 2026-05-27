@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   pgTable,
   serial,
@@ -64,13 +65,34 @@ export const bets = pgTable(
   }),
 );
 
+export const championBets = pgTable(
+  "champion_bets",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    team: text("team").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    userUnq: uniqueIndex("champion_bets_user_unq").on(t.userId),
+  }),
+);
+
 export const settings = pgTable("settings", {
   id: integer("id").primaryKey().default(1),
   viewerPassphraseHash: text("viewer_passphrase_hash").notNull(),
   adminPasswordHash: text("admin_password_hash").notNull(),
+  championCutoffAt: timestamp("champion_cutoff_at", { withTimezone: true })
+    .notNull()
+    .default(sql`'2026-06-12 02:00:00+00'::timestamptz`),
+  championWinner: text("champion_winner"),
 });
 
 export type User = typeof users.$inferSelect;
 export type Match = typeof matches.$inferSelect;
 export type Bet = typeof bets.$inferSelect;
 export type Settings = typeof settings.$inferSelect;
+export type ChampionBet = typeof championBets.$inferSelect;

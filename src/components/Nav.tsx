@@ -22,6 +22,10 @@ export function Nav({
             <>
               <Link href="/spiele" className="px-2 sm:px-3 py-1.5 rounded hover:bg-parchment-200">Spiele</Link>
               <Link href="/rangliste" className="px-2 sm:px-3 py-1.5 rounded hover:bg-parchment-200">Rangliste</Link>
+              <Link href="/weltmeister" className="px-2 sm:px-3 py-1.5 rounded hover:bg-parchment-200">
+                <span className="sm:hidden">WM</span>
+                <span className="hidden sm:inline">Weltmeister</span>
+              </Link>
             </>
           )}
           {admin && (
@@ -29,6 +33,10 @@ export function Nav({
               <Link href="/admin/spiele" className="px-2 sm:px-3 py-1.5 rounded hover:bg-parchment-200">Spiele</Link>
               <Link href="/admin/nutzer" className="px-2 sm:px-3 py-1.5 rounded hover:bg-parchment-200">Mitglieder</Link>
               <Link href="/rangliste" className="px-2 sm:px-3 py-1.5 rounded hover:bg-parchment-200">Rangliste</Link>
+              <Link href="/admin/weltmeister" className="px-2 sm:px-3 py-1.5 rounded hover:bg-parchment-200">
+                <span className="sm:hidden">WM</span>
+                <span className="hidden sm:inline">Weltmeister</span>
+              </Link>
               <Link href="/admin/einstellungen" className="px-2 sm:px-3 py-1.5 rounded hover:bg-parchment-200">
                 <span className="sm:hidden">Einst.</span>
                 <span className="hidden sm:inline">Einstellungen</span>

@@ -1,0 +1,60 @@
+// WM-2026-Teilnehmerliste für den Weltmeister-Tipp.
+//
+// Editierbar: Richard prüft die endgültigen 48 Teams einmal, sobald alle
+// Qualifikations- und Playoff-Plätze feststehen. Die genaue Mitgliedschaft
+// beeinflusst die Korrektheit nicht — wichtig ist nur, dass Mitglieder-Dropdown
+// und Admin-Sieger-Auswahl aus dieser einen Konstante lesen.
+//
+// Deutsche Ländernamen (kanonische Schreibweise wie "Deutschland"), alphabetisch
+// nach deutscher Kollation sortiert.
+export const WM2026_TEAMS: string[] = [
+  "Ägypten",
+  "Algerien",
+  "Argentinien",
+  "Australien",
+  "Belgien",
+  "Brasilien",
+  "Costa Rica",
+  "Dänemark",
+  "Deutschland",
+  "Ecuador",
+  "Elfenbeinküste",
+  "England",
+  "Frankreich",
+  "Ghana",
+  "Iran",
+  "Italien",
+  "Jamaika",
+  "Japan",
+  "Jordanien",
+  "Kamerun",
+  "Kanada",
+  "Kap Verde",
+  "Katar",
+  "Kolumbien",
+  "Kroatien",
+  "Marokko",
+  "Mexiko",
+  "Neuseeland",
+  "Niederlande",
+  "Nigeria",
+  "Norwegen",
+  "Österreich",
+  "Panama",
+  "Paraguay",
+  "Polen",
+  "Portugal",
+  "Saudi-Arabien",
+  "Schottland",
+  "Schweiz",
+  "Senegal",
+  "Serbien",
+  "Spanien",
+  "Südafrika",
+  "Südkorea",
+  "Tunesien",
+  "Türkei",
+  "Uruguay",
+  "USA",
+  "Usbekistan",
+];

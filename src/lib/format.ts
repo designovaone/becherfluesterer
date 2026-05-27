@@ -29,3 +29,19 @@ export function isLocked(kickoff: Date | string): boolean {
   const t = typeof kickoff === "string" ? new Date(kickoff).getTime() : kickoff.getTime();
   return t - BET_LOCK_MINUTES_BEFORE_KICKOFF * 60_000 <= Date.now();
 }
+
+/**
+ * Sind die Wetten für den Weltmeister-Tipp geschlossen?
+ *
+ * Schlägt bewusst Richtung OFFEN aus (Datenschutz): bei fehlendem/ungültigem
+ * Cut-off geben wir `false` zurück, damit nie "geschlossen" gemeldet wird —
+ * das würde sonst vorzeitig alle Tipps offenlegen.
+ */
+export function championBettingClosed(
+  cutoff: Date | string | null | undefined,
+): boolean {
+  if (!cutoff) return false;
+  const t = typeof cutoff === "string" ? new Date(cutoff).getTime() : cutoff.getTime();
+  if (Number.isNaN(t)) return false;
+  return t <= Date.now();
+}
