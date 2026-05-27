@@ -1,9 +1,13 @@
 // WM-2026-Teilnehmerliste für den Weltmeister-Tipp.
 //
-// Editierbar: Richard prüft die endgültigen 48 Teams einmal, sobald alle
-// Qualifikations- und Playoff-Plätze feststehen. Die genaue Mitgliedschaft
-// beeinflusst die Korrektheit nicht — wichtig ist nur, dass Mitglieder-Dropdown
-// und Admin-Sieger-Auswahl aus dieser einen Konstante lesen.
+// Die endgültigen 48 qualifizierten Mannschaften (Stand Mai 2026, Quelle:
+// Wikipedia „2026 FIFA World Cup"). Nicht qualifiziert und daher bewusst NICHT
+// auf der Liste: u. a. Italien, Polen, Nigeria, Kamerun, Serbien, Dänemark.
+// Falls sich vor Turnierbeginn noch etwas ändert: Mitglieder-Dropdown und
+// Admin-Sieger-Auswahl lesen beide aus dieser einen Konstante — hier ändern.
+//
+// Aufteilung: UEFA 16, CONMEBOL 6, CAF 10 (inkl. DR Kongo über Playoff),
+// AFC 9 (inkl. Irak über Playoff), CONCACAF 6 (inkl. Gastgeber), OFC 1 = 48.
 //
 // Deutsche Ländernamen (kanonische Schreibweise wie "Deutschland"), alphabetisch
 // nach deutscher Kollation sortiert.
@@ -13,21 +17,21 @@ export const WM2026_TEAMS: string[] = [
   "Argentinien",
   "Australien",
   "Belgien",
+  "Bosnien und Herzegowina",
   "Brasilien",
-  "Costa Rica",
-  "Dänemark",
+  "Curaçao",
   "Deutschland",
+  "DR Kongo",
   "Ecuador",
   "Elfenbeinküste",
   "England",
   "Frankreich",
   "Ghana",
+  "Haiti",
+  "Irak",
   "Iran",
-  "Italien",
-  "Jamaika",
   "Japan",
   "Jordanien",
-  "Kamerun",
   "Kanada",
   "Kap Verde",
   "Katar",
@@ -37,21 +41,20 @@ export const WM2026_TEAMS: string[] = [
   "Mexiko",
   "Neuseeland",
   "Niederlande",
-  "Nigeria",
   "Norwegen",
   "Österreich",
   "Panama",
   "Paraguay",
-  "Polen",
   "Portugal",
   "Saudi-Arabien",
   "Schottland",
+  "Schweden",
   "Schweiz",
   "Senegal",
-  "Serbien",
   "Spanien",
   "Südafrika",
   "Südkorea",
+  "Tschechien",
   "Tunesien",
   "Türkei",
   "Uruguay",
