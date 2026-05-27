@@ -3,7 +3,7 @@ import { db, championBets, settings, users } from "@/db";
 import { requireViewer } from "@/lib/auth";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
-import { championBettingClosed, formatDateTime, formatEuro } from "@/lib/format";
+import { championBettingClosed, formatEuro } from "@/lib/format";
 import { CHAMPION_STAKE_EUR, payoutPerWinner } from "@/lib/scoring";
 import { WM2026_TEAMS } from "@/lib/teams";
 
@@ -96,15 +96,16 @@ export default async function WeltmeisterPage({
         {/* Rules / cutoff banner */}
         <div className="mb-6 rounded-lg border border-amber_-500/30 bg-amber_-500/10 px-4 py-3 text-sm text-amber_-700 flex items-start gap-3">
           <span aria-hidden className="text-lg leading-none mt-0.5">🏆</span>
-          <div className="space-y-1">
-            <p>
-              <strong>Tippe, wer Weltmeister 2026 wird.</strong> Einsatz{" "}
-              {formatEuro(CHAMPION_STAKE_EUR)} — die Hälfte geht in den Topf, die
-              andere Hälfte in die Party-Kasse.
+          <div className="space-y-2">
+            <p className="text-lg font-semibold leading-snug">
+              Tippe, wer Weltmeister 2026 wird.
+            </p>
+            <p className="font-semibold">
+              Einsatz {formatEuro(CHAMPION_STAKE_EUR)}
             </p>
             <p>
-              Die Wetten schließen am{" "}
-              {cutoff ? <strong>{formatDateTime(cutoff)}</strong> : "—"}. Bis dahin
+              Die Hälfte geht in den Topf, die andere Hälfte in die Party-Kasse.
+              Die Wetten schließen 24 Stunden nach dem WM-Anpfiff. Bis dahin
               siehst du nur deinen eigenen Tipp, danach alle.
             </p>
           </div>
